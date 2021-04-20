@@ -116,6 +116,8 @@ public class PapKamNoz extends Application {
             scoreText.setText("0 : 0");
             myCount = 0;
             comCount = 0;
+            mychoice.setStyle("-fx-background-color: black");
+            compchoice.setStyle("-fx-background-color: black");
         });
 
 
