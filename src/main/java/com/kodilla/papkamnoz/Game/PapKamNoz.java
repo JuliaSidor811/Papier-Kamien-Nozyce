@@ -8,10 +8,10 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.ietf.jgss.GSSContext;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +19,14 @@ import java.util.Random;
 
 public class PapKamNoz extends Application {
 
-    private Button rock, paper, scissors, mychoice, compchoice, restart;
-    private Text scoreText;
+    private Button rock, paper, scissors, mychoice, compchoice, restart, stopGame;
+    private Text scoreText, resultText, movesText, endGameText;
     private int myCount = 0;
     private int comCount = 0;
+    private int movesCount= 0;
     private int userNumSelection;
     private int comNumSelection;
+    private String result;
 
 
     @Override
@@ -34,6 +36,12 @@ public class PapKamNoz extends Application {
         HBox mainPane = new HBox();
         HBox choicePane = new HBox();
         VBox scorePane = new VBox();
+        HBox textPane = new HBox();
+        VBox centerPane = new VBox();
+        HBox buttonPane = new HBox();
+        VBox bottomPane = new VBox();
+        VBox topPane = new VBox();
+
 
         // mainPane
         mychoice = new Button();
@@ -74,31 +82,78 @@ public class PapKamNoz extends Application {
         choicePane.setSpacing(50);
         choicePane.setPadding(new Insets(15, 15, 15, 15));
 
-        //Wyniki
+        //Licznik wyniku
         scoreText = new Text();
         scoreText.setText("0 : 0");
         scoreText.setStyle("-fx-font-size: 50");
+
+        movesText = new Text();
+        movesText.setFont(Font.font("Verdena",15));
+
+        scorePane.getChildren().addAll(scoreText, movesText);
+        scorePane.setAlignment(Pos.CENTER);
+        scorePane.setPadding(new Insets(12,12,12,12));
+
+
+
+        //Top Pane
+        endGameText = new Text();
+        endGameText.setFont(Font.font("Verdena",30));
+        endGameText.setFill(Color.DEEPPINK);
+
+        topPane.getChildren().addAll(endGameText,scorePane);
+        topPane.setAlignment(Pos.CENTER);
+        topPane.setPadding(new Insets(20,30,8,30));
+
+
+
+        //Wynik tekst
+        resultText = new Text();
+        resultText.setStyle("-fx-font-style: italic");
+        resultText.setFont(Font.font("Verdana",25));
+        textPane.getChildren().add(resultText);
+        textPane.setAlignment(Pos.CENTER);
+        textPane.setPadding(new Insets(10,10,10,10));
+        centerPane.getChildren().addAll(mainPane,textPane);
+
+        //BottomPane
         restart = new Button("Restart");
         restart.setMinSize(20,20);
         restart.setStyle("-fx-border-color: deeppink");
-        scorePane.getChildren().addAll(restart,scoreText);
-        scorePane.setAlignment(Pos.CENTER);
-        scorePane.setPadding(new Insets(20,20,20,20));
+        restart.setFont(Font.font("Verdena", 15));
+
+        stopGame = new Button("Stop Game");
+        stopGame.setMinSize(20,20);
+        stopGame.setStyle("-fx-border-color: deeppink");
+        stopGame.setFont(Font.font("Verdena", 15));
+
+        buttonPane.getChildren().addAll(restart, stopGame);
+        buttonPane.setAlignment(Pos.CENTER);
+        buttonPane.setSpacing(25);
+        buttonPane.setPadding(new Insets(10,10,10,10));
+
+        bottomPane.getChildren().addAll(choicePane,buttonPane);
 
 
-        pane.setTop(scorePane);
-        pane.setCenter(mainPane);
-        pane.setBottom(choicePane);
+        pane.setTop(topPane);
+        pane.setCenter(centerPane);
+        pane.setBottom(bottomPane);
+
+
+
+
 
         rock.setOnAction(event ->
         {
             userNumSelection = 1;
             mychoice.setStyle("-fx-background-image: url('https://www.mcgill.ca/oss/files/oss/styles/hd/public/pebble-3215317_1920_1.jpeg?itok=dJy0SPKE&timestamp=1601650822')");
+            movesCount += 1;
             game();
             userNumSelection = 0;
         });
         paper.setOnAction(event -> {
             userNumSelection = 2;
+            movesCount += 1;
             mychoice.setStyle("-fx-background-image: url('https://thumbs.dreamstime.com/b/crushed-white-paper-texture-as-background-36495349.jpg')");
             game();
             userNumSelection = 0;
@@ -106,6 +161,7 @@ public class PapKamNoz extends Application {
         });
         scissors.setOnAction(event -> {
             userNumSelection = 3;
+            movesCount += 1;
             mychoice.setStyle("-fx-background-image: url('https://www.thoughtco.com/thmb/8_uEQD_VvWpAHUfN2QY2SCEeC9M=/768x0/filters:no_upscale():max_bytes(150000):strip_icc()/TasselScissorCharm1-57bb74b63df78c87631fc3a5.jpg')");
             game();
             userNumSelection = 0;
@@ -114,11 +170,27 @@ public class PapKamNoz extends Application {
 
         restart.setOnAction(event ->{
             scoreText.setText("0 : 0");
+            resultText.setText("");
+            movesText.setText("");
+            endGameText.setText("");
+            movesCount = 0;
             myCount = 0;
             comCount = 0;
             mychoice.setStyle("-fx-background-color: black");
             compchoice.setStyle("-fx-background-color: black");
+            rock.setDisable(false);
+            scissors.setDisable(false);
+            paper.setDisable(false);
         });
+        stopGame.setOnAction(event -> {
+            displayGameEndResult();
+            rock.setDisable(true);
+            scissors.setDisable(true);
+            paper.setDisable(true);
+
+        });
+
+
 
 
         primaryStage.setScene(new Scene(pane));
@@ -144,21 +216,48 @@ public class PapKamNoz extends Application {
 
         }
     }
+
     public void game(){
         displayComChoice();
         if((userNumSelection == 1 && comNumSelection == 3) || (userNumSelection == 2 && comNumSelection == 1) || (userNumSelection == 3 && comNumSelection == 2)){
             myCount +=1;
             displayScore();
+            displayMovesCount();
+            result = "You win!";
+            displayResult();
         }else if((userNumSelection == 1 && comNumSelection == 2 ) || (userNumSelection == 2 && comNumSelection == 3) || (userNumSelection == 3 && comNumSelection == 1)){
             comCount += 1;
             displayScore();
+            displayMovesCount();
+            result = "Computer wins!";
+            displayResult();
         }else{
             displayScore();
+            displayMovesCount();
+            result = "A tie!";
+            displayResult();
+
         }
     }
 
     public void displayScore() {
         scoreText.setText(myCount + " : " + comCount);
+    }
+    public void displayResult(){
+        resultText.setText(result);
+    }
+    public void displayMovesCount(){
+        movesText.setText("Moves Count: "+ movesCount);
+    }
+    public void displayGameEndResult(){
+        if(myCount > comCount){
+            endGameText.setText("Congratulations! You win whole game!");
+        }
+        else if(comCount > myCount){
+            endGameText.setText("Sadly, Computer wins. Good luck next time!");
+        } else{
+            endGameText.setText("Nobody wins!");
+        }
     }
 
     public static void main(String[] args) {
